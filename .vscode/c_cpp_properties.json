@@ -7,7 +7,10 @@
                 "${workspaceFolder}/common/include/**",
                 "${workspaceFolder}/stm_spl/CMSIS/inc/**",
                 "${workspaceFolder}/stm_spl/CMSIS/ST/inc/**",
-                "${workspaceFolder}/stm_spl/STM32F4xx/inc/**"
+                "${workspaceFolder}/stm_spl/STM32F4xx/inc/**" 
+                
+
+
             ],
             "defines": [
                 "USE_STDPERIPH_DRIVER",

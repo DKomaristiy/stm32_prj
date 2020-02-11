@@ -1,4 +1,10 @@
 {
     "cortex-debug.armToolchainPath": "/usr/bin",
-    "cortex-debug.openocdPath": "/usr/local/bin/openocd"
+    "cortex-debug.openocdPath": "/usr/local/bin/openocd",
+    "files.associations": {
+        "usbd_cdc_core.h": "c",
+        "usbd_usr.h": "c",
+        "main.h": "c",
+        "stm32f4_discovery.h": "c"
+    }
 }

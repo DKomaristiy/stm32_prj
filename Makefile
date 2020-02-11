@@ -3,13 +3,13 @@ BUILD_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 SPL_PATH = $(BUILD_ROOT)/stm_spl/
 COMMON_PATH = $(BUILD_ROOT)/common
-LABS_DIR = $(BUILD_ROOT)/projects
+AUDIO_DIR = $(BUILD_ROOT)/projects
 
-.PHONY: labs spl common lab4 clean
+.PHONY: labs spl common audio_prj clean
 
 all: labs
 
-labs: lab4
+labs: audio_prj
 
 spl:
 	make -C $(SPL_PATH)
@@ -17,10 +17,10 @@ spl:
 common:
 	make -C $(COMMON_PATH)
 
-lab4: spl common
-	make -C $(LABS_DIR)/lab_4
+audio_prj: spl common
+	make -C $(AUDIO_DIR)/audio_prj
 
 clean:
 	make -C $(SPL_PATH) clean
 	make -C $(COMMON_PATH) clean
-	make -C $(LABS_DIR)/lab_4 clean
+	make -C $(AUDIO_DIR)/audio_prj clean
