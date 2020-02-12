@@ -1,4 +1,5 @@
 #include "lcd.h"
+#include "timer.h" 
 //------------------------------------------------
 void delay(void)
 {
@@ -8,6 +9,16 @@ void delay(void)
 		
 	}
 }
+
+void Delay_t(uint32_t value)
+{
+   for (uint32_t i=0; i<value;i++)
+   {
+      __NOP();
+   }
+
+}
+
 //------------------------------------------------
 void LCD_WriteData(uint8_t dt)
 {
@@ -46,7 +57,7 @@ void LCD_Data(uint8_t dt)
 void LCD_Clear(void)
 {
 	LCD_Command(0x01);
-	HAL_Delay(2);
+	sleep_tick_ms(20);
 }
 //------------------------------------------------
 void LCD_SendChar(char ch)
@@ -72,54 +83,54 @@ void LCD_SetPos(uint8_t x, uint8_t y)
 	{
 		case 0:
 			LCD_Command(x|0x80);
-			HAL_Delay(1);
+			sleep_tick_ms(10);
 			break;
 		case 1:
 			LCD_Command((0x40+x)|0x80);
-			HAL_Delay(1);
+			sleep_tick_ms(10);
 			break;
 		case 2:
 			LCD_Command((0x14+x)|0x80);
-			HAL_Delay(1);
+			sleep_tick_ms(10);
 			break;
 		case 3:
 			LCD_Command((0x54+x)|0x80);
-			HAL_Delay(1);
+			sleep_tick_ms(10);
 			break;
 	}
 }
 //------------------------------------------------
 void LCD_ini(void)
 {
-	HAL_Delay(40);
+	sleep_tick_ms(40);
 	rs0;
 	LCD_WriteData(3);
 	e1;
 	delay();
 	e0;
-	HAL_Delay(1);
+	sleep_tick_ms(10);
 	LCD_WriteData(3);
 	e1;
 	delay();
 	e0;
-	HAL_Delay(1);
+	sleep_tick_ms(10);
 	LCD_WriteData(3);
 	e1;
 	delay();
 	e0;
-	HAL_Delay(1);
-	LCD_Command(0x28);//режим 4 бит, 2 линии (для нашего большого дисплея это 4 линии, шрифт 5х8	
-	HAL_Delay(1);
-	LCD_Command(0x28);//еще раз для верности
-	HAL_Delay(1);
-	LCD_Command(0x0C);//дисплей включаем (D=1), курсоры никакие не нужны
-	HAL_Delay(1);
-	LCD_Command(0x01);//уберем мусор
-	HAL_Delay(2);
-	LCD_Command(0x06);//пишем влево
-	HAL_Delay(1);
-	LCD_Command(0x02);//возвращаем курсор в нулевое положение
-	HAL_Delay(2);
+	sleep_tick_ms(10);
+	LCD_Command(0x28);//пїЅпїЅпїЅпїЅпїЅ 4 пїЅпїЅпїЅ, 2 пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ 4 пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ 5пїЅ8	
+	sleep_tick_ms(10);
+	LCD_Command(0x28);//пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	sleep_tick_ms(10);
+	LCD_Command(0x0C);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (D=1), пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	sleep_tick_ms(10);
+	LCD_Command(0x01);//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	sleep_tick_ms(20);
+	LCD_Command(0x06);//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	sleep_tick_ms(10);
+	LCD_Command(0x02);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	sleep_tick_ms(20);
 	
 }
 

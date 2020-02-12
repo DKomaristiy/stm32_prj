@@ -1,5 +1,5 @@
 BUILD_ROOT=../..
-OBJS = main.o
+OBJS = timer.o lcd.o main.o 
 
 BINARY_NAME = main
 

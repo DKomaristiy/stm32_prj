@@ -10,7 +10,7 @@
         "type": "cortex-debug",
         "cwd": "${workspaceRoot}",
         "servertype": "openocd",
-        "executable": "projects/audio_prj//main.elf",
+        "executable": "projects/lcd//main.elf",
        // "svdFile": "STM32F429.svd",
         "configFiles": [
             "/usr/local/share/openocd/scripts/board/stm32f4discovery.cfg"

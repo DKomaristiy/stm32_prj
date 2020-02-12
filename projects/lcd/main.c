@@ -2,6 +2,10 @@
 #include <stm32f4xx.h>
 
 #include "main.h"
+//#include "lcd.c"
+//#include "timer.c"
+#include "timer.h"
+
 
 //#include "stm32f4xx_hal.h"
 
@@ -17,10 +21,38 @@ uint16_t ADC_Data=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
+void SetSysClockTo168();
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
+
+void init_board_led()
+{
+     GPIO_InitTypeDef GPIO_InitStructure;
+
+
+    /* Enable peripheral clock for LEDs and buttons port */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+    /* Init LEDs */
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0 ;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* Turn all the leds off */
+    GPIO_SetBits(GPIOA, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+
+}
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -45,106 +77,138 @@ int main(void)
  // HAL_Init();
 
   /* Configure the system clock */
-  //SystemClock_Config();
+  SetSysClockTo168();
+
+  configure_timer_2();
+
+  init_board_led();
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC1_Init();
+  
+ // MX_ADC1_Init();
 
-  /* USER CODE BEGIN 2 */
+  
+  
+  
+sleep_tick_ms(500);
+
 	LCD_ini();
 	LCD_Clear();
-	//HAL_ADC_Start_IT(&hadc1);
-	//HAL_Delay(1000);
-  /* USER CODE END 2 */
+ sleep_tick_ms(1000);
+ LCD_SendChar("T");
+ LCD_SendChar("T");
+ LCD_SendChar("T");
+ LCD_SendChar("T");
+ LCD_SendChar("T");
+LCD_SendChar("T");
+  sleep_tick_ms(1000);
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+LCD_SendChar("T");
+ LCD_SendChar("T");
+ LCD_SendChar("T");
+LCD_SendChar("T");
+  sleep_tick_ms(1000);
+LCD_SendChar("T");
+ LCD_SendChar("T");
+
+
+
+
   while (1)
   {
-		adc_value = ADC_Data;
-		LCD_SetPos(0, 0);
-		sprintf(str1,"%d   ",adc_value);
-		LCD_String(str1);
-		LCD_SetPos(0, 1);
+	//	adc_value = ADC_Data;
+	//	LCD_SetPos(0, 0);
+	//	sprintf(str1,"%d   ",adc_value);
+	/*	LCD_String(str1);
+		
 		if(adc_value<200) LCD_String("RIGHT KEY ");
 		else if(adc_value<700) LCD_String("UP KEY    ");
 		else if(adc_value<1200) LCD_String("DOWN KEY  ");
 		else if(adc_value<1800) LCD_String("LEFT KEY  ");
 		else if(adc_value<2300) LCD_String("SELECT KEY");
 		HAL_Delay(200);
-  /* USER CODE END WHILE */
+    */
+  // LCD_String("HELLO FRom MK");
+   //sleep_tick_ms(2000);
+   for (int j=0; j<4;j++) 
+        {    
+            GPIO_SetBits(GPIOD, GPIO_Pin_12 << j);     
+            sleep_tick_ms(1000);
+            GPIO_ResetBits(GPIOD,GPIO_Pin_12 << j );
+            
+        }
+        
+ /*       sleep_tick_ms(10);
+LCD_SendChar("S");
+sleep_tick_ms(10);
+LCD_SendChar("t");
+sleep_tick_ms(10);
+LCD_SendChar("1");
+sleep_tick_ms(10);*/
 
-  /* USER CODE BEGIN 3 */
+
+     
+      // LCD_SetPos(0, 1);
+       // LCD_String("BY BY    ");
+       sleep_tick_ms(1000);
+        LCD_String("SELECT KEY");
+        
+  
+
+
   }
-  /* USER CODE END 3 */
+  
 
 }
 
 /** System Clock Configuration
 */
-void SystemClock_Config(void)
+
+void SetSysClockTo168(void)
 {
+  int HSEStartUpStatus;
+  RCC_DeInit();
+  /* Enable HSE */
+  RCC_HSEConfig( RCC_HSE_ON);
 
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-    /**Configure the main internal regulator output voltage 
-    */
-  __HAL_RCC_PWR_CLK_ENABLE();
+  HSEStartUpStatus = RCC_WaitForHSEStartUp();
 
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  if (HSEStartUpStatus == SUCCESS)
   {
-    Error_Handler();
+
+     RCC_PLLConfig(RCC_PLLSource_HSE,8,336,2,4);
+
+     RCC_PLLCmd( ENABLE);
+
+        /* Wait till PLL is ready */
+     while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
+     {
+     }
+
+     /* Select PLL as system clock source */
+     RCC_SYSCLKConfig( RCC_SYSCLKSource_PLLCLK);
+
+     /* Wait till PLL is used as system clock source */
+     while (RCC_GetSYSCLKSource() != 0x08)
+     {
+     }
+
   }
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV16;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-    /**Configure the Systick interrupt time 
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
+
+
 
 /* ADC1 init function */
 static void MX_ADC1_Init(void)
 {
 
-  ADC_ChannelConfTypeDef sConfig;
+  //ADC_ChannelConfTypeDef sConfig;
 
     /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
     */
-  hadc1.Instance = ADC1;
+  /*hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = DISABLE;
@@ -158,18 +222,18 @@ static void MX_ADC1_Init(void)
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
-  }
+  }*/
 
     /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
     */
-  sConfig.Channel = ADC_CHANNEL_5;
+  /* sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-
+*/
 }
 
 /** Configure pins as 
@@ -183,44 +247,47 @@ static void MX_GPIO_Init(void)
 {
 
 
-  GPIO_InitTypeDef  GPIO_InitStructж
+  GPIO_InitTypeDef GPIO_InitStructure;
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOH, ENABLE);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
+  GPIO_ResetBits(GPIOD, GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6|GPIO_Pin_7);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+  GPIO_ResetBits(GPIOD, GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6|GPIO_Pin_7);
+  GPIO_ResetBits(GPIOB, GPIO_Pin_8|GPIO_Pin_9 );
 
   /*Configure GPIO pins : PD4 PD5 PD6 PD7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6|GPIO_Pin_7;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
 
   /*Configure GPIO pins : PB8 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  
 
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc1)
+/*void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc1)
 {
 	ADC_Data = HAL_ADC_GetValue(hadc1);
 //	HAL_ADC_Start_IT(hadc1);
-}
+}*/
 /* USER CODE END 4 */
-
+/*
 /**
   * @brief  This function is executed in case of error occurrence.
   * @param  None

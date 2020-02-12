@@ -5,6 +5,9 @@
         "usbd_cdc_core.h": "c",
         "usbd_usr.h": "c",
         "main.h": "c",
-        "stm32f4_discovery.h": "c"
+        "stm32f4_discovery.h": "c",
+        "lcd.h": "c",
+        "timer.h": "c",
+        "stm32f4xx.h": "c"
     }
 }

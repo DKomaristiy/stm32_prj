@@ -1,5 +1,5 @@
 BUILD_ROOT=../..
-OBJS = main.o
+OBJS = audio_init.o main.o
 
 BINARY_NAME = main
 
