@@ -2,29 +2,17 @@
 #include <stm32f4xx.h>
 
 #include "main.h"
-//#include "lcd.c"
-//#include "timer.c"
 #include "timer.h"
+#include <stdio.h>
 
-
-//#include "stm32f4xx_hal.h"
-
-/* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
-
-/* Private variables ---------------------------------------------------------*/
- // ADC_HandleTypeDef hadc1;
-
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
 uint16_t ADC_Data=0;
-/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SetSysClockTo168();
+void SetSysClockTo168(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
-static void MX_ADC1_Init(void);
+void adc_init() ;
+uint16_t readADC1(uint8_t channel);
 
 void init_board_led()
 {
@@ -54,27 +42,10 @@ void init_board_led()
 
 }
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
 	char str1[7];
 	uint16_t adc_value=0;
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
- // HAL_Init();
 
   /* Configure the system clock */
   SetSysClockTo168();
@@ -86,77 +57,41 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   
- // MX_ADC1_Init();
+  adc_init();
 
-  
-  
-  
-sleep_tick_ms(500);
+  sleep_tick_ms(1500);
+  ADC_TempSensorVrefintCmd(ENABLE); 
 
 	LCD_ini();
 	LCD_Clear();
- sleep_tick_ms(1000);
- LCD_SendChar("T");
- LCD_SendChar("T");
- LCD_SendChar("T");
- LCD_SendChar("T");
- LCD_SendChar("T");
-LCD_SendChar("T");
   sleep_tick_ms(1000);
 
-LCD_SendChar("T");
- LCD_SendChar("T");
- LCD_SendChar("T");
-LCD_SendChar("T");
-  sleep_tick_ms(1000);
-LCD_SendChar("T");
- LCD_SendChar("T");
-
-
-
+  LCD_SetPos(0, 1);
+  LCD_String("HELLO FRom MK");
 
   while (1)
   {
-	//	adc_value = ADC_Data;
-	//	LCD_SetPos(0, 0);
-	//	sprintf(str1,"%d   ",adc_value);
-	/*	LCD_String(str1);
+		adc_value = readADC1(ADC_Channel_5);
+		LCD_SetPos(0, 0);
+    utoa(adc_value, str1, 10);
+   	LCD_String(str1);
 		
-		if(adc_value<200) LCD_String("RIGHT KEY ");
-		else if(adc_value<700) LCD_String("UP KEY    ");
-		else if(adc_value<1200) LCD_String("DOWN KEY  ");
-		else if(adc_value<1800) LCD_String("LEFT KEY  ");
-		else if(adc_value<2300) LCD_String("SELECT KEY");
-		HAL_Delay(200);
-    */
-  // LCD_String("HELLO FRom MK");
-   //sleep_tick_ms(2000);
-   for (int j=0; j<4;j++) 
+		if(adc_value<200) LCD_String(" RIGHT KEY ");
+		else if(adc_value<700) LCD_String(" UP KEY    ");
+		else if(adc_value<1200) LCD_String(" DOWN KEY  ");
+		else if(adc_value<1800) LCD_String(" LEFT KEY  ");
+		else if(adc_value<2300) LCD_String(" SELECT KEY");
+		sleep_tick_ms(200);
+    
+
+   /*for (int j=0; j<4;j++) 
         {    
             GPIO_SetBits(GPIOD, GPIO_Pin_12 << j);     
             sleep_tick_ms(1000);
-            GPIO_ResetBits(GPIOD,GPIO_Pin_12 << j );
+            GPIO_ResetBits(GPIOD,GPIO_Pin_12 << j ); 
             
         }
-        
- /*       sleep_tick_ms(10);
-LCD_SendChar("S");
-sleep_tick_ms(10);
-LCD_SendChar("t");
-sleep_tick_ms(10);
-LCD_SendChar("1");
-sleep_tick_ms(10);*/
-
-
-     
-      // LCD_SetPos(0, 1);
-       // LCD_String("BY BY    ");
-       sleep_tick_ms(1000);
-        LCD_String("SELECT KEY");
-        
-  
-
-
+      */  
   }
   
 
@@ -199,50 +134,51 @@ void SetSysClockTo168(void)
 }
 
 
-
-/* ADC1 init function */
-static void MX_ADC1_Init(void)
+void adc_init() 
 {
+       ADC_InitTypeDef ADC_InitStructure;
+       ADC_StructInit(&ADC_InitStructure);
+ 
+       ADC_CommonInitTypeDef adc_init;
+       ADC_CommonStructInit(&adc_init);
+       /* разрешаем тактирование AЦП1 */
+       RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+       /* сбрасываем настройки АЦП */
+       ADC_DeInit();
+ 
+       /* АЦП1 и АЦП2 работают независимо */
+       adc_init.ADC_Mode = ADC_Mode_Independent;
+       adc_init.ADC_Prescaler = ADC_Prescaler_Div2;
+       /* выключаем scan conversion */
+       ADC_InitStructure.ADC_ScanConvMode = DISABLE;
+       /* Не делать длительные преобразования */
+       ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+ 
+       /* Начинать преобразование программно, а не по срабатыванию триггера */
+       ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConvEdge_None;
+       /* 12 битное преобразование. результат в 12 младших разрядах результата */
+       ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+ 
+       /* инициализация */
+       ADC_CommonInit(&adc_init);
+ 
+       ADC_Init(ADC1, &ADC_InitStructure);
+       /* Включаем АЦП1 */
+       ADC_Cmd(ADC1, ENABLE);
 
-  //ADC_ChannelConfTypeDef sConfig;
-
-    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
-    */
-  /*hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  if (HAL_ADC_Init(&hadc1) != HAL_OK)
-  {
-    Error_Handler();
-  }*/
-
-    /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-    */
-  /* sConfig.Channel = ADC_CHANNEL_5;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-*/
+      
+}
+uint16_t readADC1(uint8_t channel)
+{
+   ADC_RegularChannelConfig(ADC1, channel, 1, ADC_SampleTime_3Cycles);
+   // начинаем работу
+   ADC_SoftwareStartConv(ADC1);
+   // ждём пока преобразуется напряжение в код
+   while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
+   // возвращаем результат
+   return ADC_GetConversionValue(ADC1);
 }
 
-/** Configure pins as 
-        * Analog 
-        * Input 
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
 static void MX_GPIO_Init(void)
 {
 
@@ -254,6 +190,16 @@ static void MX_GPIO_Init(void)
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOH, ENABLE);
+
+  //GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_TIM1);
+
+  //PA5 – вход АЦП
+  GPIO_StructInit(&GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   /*Configure GPIO pin Output Level */
   GPIO_ResetBits(GPIOD, GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6|GPIO_Pin_7);
@@ -280,19 +226,7 @@ static void MX_GPIO_Init(void)
 
 }
 
-/* USER CODE BEGIN 4 */
-/*void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc1)
-{
-	ADC_Data = HAL_ADC_GetValue(hadc1);
-//	HAL_ADC_Start_IT(hadc1);
-}*/
-/* USER CODE END 4 */
-/*
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
+
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler */
@@ -314,21 +248,8 @@ void Error_Handler(void)
    */
 void assert_failed(uint8_t* file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-    ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
 
 }
 
 #endif
 
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-*/ 
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

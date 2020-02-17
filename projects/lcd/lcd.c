@@ -108,29 +108,30 @@ void LCD_ini(void)
 	e1;
 	delay();
 	e0;
-	sleep_tick_ms(10);
+	sleep_tick_ms(5);
 	LCD_WriteData(3);
 	e1;
 	delay();
 	e0;
-	sleep_tick_ms(10);
+	sleep_tick_ms(1);
 	LCD_WriteData(3);
 	e1;
 	delay();
-	e0;
-	sleep_tick_ms(10);
-	LCD_Command(0x28);//����� 4 ���, 2 ����� (��� ������ �������� ������� ��� 4 �����, ����� 5�8	
-	sleep_tick_ms(10);
-	LCD_Command(0x28);//��� ��� ��� ��������
-	sleep_tick_ms(10);
-	LCD_Command(0x0C);//������� �������� (D=1), ������� ������� �� �����
-	sleep_tick_ms(10);
-	LCD_Command(0x01);//������ �����
-	sleep_tick_ms(20);
-	LCD_Command(0x06);//����� �����
-	sleep_tick_ms(10);
-	LCD_Command(0x02);//���������� ������ � ������� ���������
-	sleep_tick_ms(20);
+	e0;	
+	sleep_tick_ms(1);
+	LCD_Command(0x2);	
+	sleep_tick_ms(1);
+	//LCD_Command(0x28);
+	//sleep_tick_ms(1);
+	LCD_Command(0x0C); // 0xF мигающий курсор
+	sleep_tick_ms(1);
+	LCD_Command(0x01);
+	sleep_tick_ms(2);
+	LCD_Command(0x06);
+	sleep_tick_ms(1);
+	LCD_Command(0x02);
+	sleep_tick_ms(2);
+	
 	
 }
 

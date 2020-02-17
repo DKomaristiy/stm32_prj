@@ -44,6 +44,7 @@ void LCD_SetPos(uint8_t x, uint8_t y);
 void LCD_WriteData(uint8_t dt);
 void LCD_Command(uint8_t dt);
 void LCD_Data(uint8_t dt);
+void delay(void);
 
 void Delay_t(uint32_t value);
 //------------------------------------------------
